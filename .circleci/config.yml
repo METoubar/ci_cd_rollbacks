@@ -1,0 +1,48 @@
+version: 2.1
+
+command:
+  destroy_environments:
+    steps:
+      - run:
+          name: Destroy Slack
+          command: |
+            aws cloudformation delete-stack-name prod-${CIRCLE_WORKFLOW_ID}
+
+jobs:
+  configure_infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Ensure backend infrastructure exist
+          command: |
+            aws cloudformation deploy \
+            --template-file template_IS.yml \
+            --stack-name prod-${CIRCLE_WORKFLOW_ID} \
+            --region us-east-2
+  smoke_test:
+    docker:
+      - image: alpine:latest
+    steps:
+      - run: apk add --update curl
+      - run:
+          name: smoke test.
+          command: |
+            URL="https://blog.udacity33.com/"
+            if curl -s --head ${URL} # test if blog.udacity. com exists
+            then
+             return 0
+            else
+             return 1
+            fi
+      - destroy_environments:
+          when: on_fail
+
+workflows:
+  my_workflow:
+    jobs:
+      - configure_infrastructure
+      - smoke_test:
+          requires:
+            - configure_infrastructure
