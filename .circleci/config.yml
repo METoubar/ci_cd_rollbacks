@@ -36,8 +36,8 @@ jobs:
             else
              return 1
             fi
-      - destroy_environments:
-          when: on_fail
+      - destroy_environments
+    when: on_fail
 
 workflows:
   my_workflow:
