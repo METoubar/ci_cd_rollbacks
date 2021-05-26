@@ -25,7 +25,6 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - run: apk add --update curl
       - when:
           condition: on_fail
           steps:
