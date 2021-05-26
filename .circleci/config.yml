@@ -26,6 +26,10 @@ jobs:
       - image: alpine:latest
     steps:
       - run: apk add --update curl
+      - when:
+          condition: on_fail
+          steps:
+            - destroy_environments
       - run:
           name: smoke test.
           command: |
@@ -36,10 +40,6 @@ jobs:
             else
              return 1
             fi
-      - when:
-          condition: on_fail
-          steps:
-            - destroy_environments
 
 workflows:
   my_workflow:
